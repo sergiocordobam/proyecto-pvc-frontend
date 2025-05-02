@@ -37,7 +37,11 @@ function RegisterForm() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error during registration');
-      setMessage({ type: 'success', text: data.message });
+      setMessage({ type: 'success', text: data.message });              
+      setTimeout(() => {
+        // window.location.href = '/login';
+        window.location.reload();
+      }, 2000);    
     } catch (err) {
       setMessage({ type: 'danger', text: err.message });
     }
