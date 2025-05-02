@@ -1,0 +1,19 @@
+
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" rx="24" fill="#0F172A"/>
+
+  <!-- Central circle representing a user or a secure core -->
+  <circle cx="60" cy="60" r="12" fill="#38BDF8"/>
+
+  <!-- Layered rectangles forming a dynamic document flow -->
+  <rect x="30" y="30" width="25" height="35" rx="4" stroke="#3B82F6" stroke-width="2" fill="none" transform="rotate(-10 30 30)"/>
+  <rect x="65" y="35" width="25" height="35" rx="4" stroke="#60A5FA" stroke-width="2" fill="none" transform="rotate(10 65 35)"/>
+
+  <!-- Curved arc symbolizing flow or network -->
+  <path d="M35 85c10-20 40-20 50 0" stroke="#38BDF8" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Subtle dot cluster to suggest digital interaction -->
+  <circle cx="45" cy="95" r="2" fill="#93C5FD"/>
+  <circle cx="60" cy="97" r="2" fill="#93C5FD"/>
+  <circle cx="75" cy="95" r="2" fill="#93C5FD"/>
+</svg>
