@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Button, Container, Card } from 'react-bootstrap';
 
 function Home() {
