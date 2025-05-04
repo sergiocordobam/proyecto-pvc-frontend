@@ -39,9 +39,8 @@ function RegisterForm() {
       if (!res.ok) throw new Error(data.error || 'Error during registration');
       setMessage({ type: 'success', text: data.message });              
       setTimeout(() => {
-        // window.location.href = '/login';
-        window.location.reload();
-      }, 2000);    
+        window.location.href = '/my-profile';
+      }, 4000);    
     } catch (err) {
       setMessage({ type: 'danger', text: err.message });
     }
@@ -72,12 +71,16 @@ function RegisterForm() {
                     <Form.Group className="mb-3">
                         <Form.Label>Document ID</Form.Label>
                         <Form.Control
-                        type="text"
+                        type="number"
                         name="document_id"
                         value={formData.document_id}
                         onChange={handleChange}
                         required
+                        isInvalid={formData.document_id && (formData.document_id.length < 7 || formData.document_id.length > 10)}
                         />
+                        <Form.Control.Feedback type="invalid">
+                            Document ID must be between 7 and 10 digits.
+                        </Form.Control.Feedback>
                     </Form.Group>
                     </Col>
                 </Row>
@@ -86,13 +89,17 @@ function RegisterForm() {
                     <Col md={6}>
                     <Form.Group className="mb-3">
                         <Form.Label>Document Type</Form.Label>
-                        <Form.Control
-                        type="text"
+                        <Form.Select
                         name="document_type"
                         value={formData.document_type}
                         onChange={handleChange}
                         required
-                        />
+                        >
+                            <option value="">Select Document Type</option>
+                            <option value="CC">CC</option>
+                            <option value="TI">TI</option>
+                            <option value="Passport">Passport</option>
+                        </Form.Select>
                     </Form.Group>
                     </Col>
                     <Col md={6}>
@@ -117,7 +124,11 @@ function RegisterForm() {
                     value={formData.phone}
                     onChange={handleChange}
                     required
+                    isInvalid={formData.phone && formData.phone.length !== 10}
                     />
+                    <Form.Control.Feedback type="invalid">
+                        Phone number must be 10 digits.
+                    </Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group className="mb-3">
