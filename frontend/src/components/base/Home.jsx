@@ -1,9 +1,11 @@
 import { Button, Container, Card } from 'react-bootstrap';
+import NavbarPvc from './Navbar';
 
 function Home() {
 
     return (
         <>
+            <NavbarPvc />
             <Container className="d-flex justify-content-center align-items-center max-vh-75 bg-light" style={{ maxWidth: '500px' }}>
                 <div className="w-100" style={{ maxWidth: '500px' }}>
                     <Card className="text-center">

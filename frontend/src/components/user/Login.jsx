@@ -1,11 +1,24 @@
-import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { useState, useEffect } from "react";
+import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../config/firebase";
 import { Form, Container, Button } from "react-bootstrap";
+import NavbarPvc from "../base/Navbar";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
     const [formData, setFormData] = useState({ email: "", password: "" });
     const [message, setMessage] = useState("");
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                navigate("/my-profile");
+            }
+        });
+
+        return () => unsubscribe();
+    }, [navigate]);
 
     const handleChange = (e) =>
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -39,16 +52,18 @@ export default function Login() {
                 setMessage("Invalid token");
             }
         } catch (error) {
-            setMessage(error.message);
+            console.log("error")
+            setMessage("Invalid email or password");
         }
     };
 
     return (
         <>
+            <NavbarPvc />
             <Container className="d-flex justify-content-center align-items-center max-vh-75 bg-light" style={{ maxWidth: '500px' }}>
                 <div className="w-100" style={{ maxWidth: '500px' }}>
                     <h2 className="text-center mb-4">Login</h2>
-                    {/* {message && <div>{message}</div>} */}
+                    {message && <div>{message}</div>}
                     <Form onSubmit={handleSubmit}>
                         <Form.Group controlId="formBasicEmail">
                             <Form.Label>Email address</Form.Label>

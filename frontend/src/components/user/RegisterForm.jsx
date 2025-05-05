@@ -1,7 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
+import NavbarPvc from '../base/Navbar';
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../config/firebase";
+import { useNavigate } from "react-router-dom";
 
 function RegisterForm() {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+          if (user) {
+              navigate("/my-profile");
+          }
+      });
+
+      return () => unsubscribe();
+  }, [navigate]);
+  
   const [formData, setFormData] = useState({
     full_name: '',
     document_id: '',
@@ -47,7 +63,9 @@ function RegisterForm() {
   };
 
   return (
-    <Container className="d-flex justify-content-center align-items-center max-vh-75 bg-light" style={{ maxWidth: '500px' }}>
+    <>
+        <NavbarPvc />
+        <Container className="d-flex justify-content-center align-items-center max-vh-75 bg-light" style={{ maxWidth: '500px' }}>
         <div className="w-100" style={{ maxWidth: '500px' }}>
             {message && <Alert variant={message.type}>{message.text}</Alert>}
 
@@ -172,6 +190,8 @@ function RegisterForm() {
             </Form>
         </div>
     </Container>
+    </>
+    
 );
 }
 

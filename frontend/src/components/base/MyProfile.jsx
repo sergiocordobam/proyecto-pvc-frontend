@@ -1,10 +1,13 @@
+import NavbarPvc
+ from "./Navbar";
 function MyProfile() {
-
-    return (
-        <>
-            <h2>My Profile</h2>
-        </>
-    );
+  return (
+    <div>
+        <NavbarPvc />
+      <h1>My Profile</h1>
+      <p>This is the My Profile component.</p>
+    </div>
+  );
 }
 
 export default MyProfile;
