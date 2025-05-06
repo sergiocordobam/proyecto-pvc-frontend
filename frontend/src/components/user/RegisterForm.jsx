@@ -7,6 +7,7 @@ import NavbarPvc from '../base/Navbar';
 
 function RegisterForm() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(null);
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -33,6 +34,7 @@ function RegisterForm() {
     e.preventDefault();
 
     try {
+      setLoading(true)
       const res = await fetch('http://localhost:8000/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -45,6 +47,7 @@ function RegisterForm() {
       const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
 
       setMessage({ type: 'success', text: 'Registration successful!' });
+      setLoading(false);
 
       setTimeout(() => {
         navigate("/my-profile");
@@ -61,6 +64,7 @@ function RegisterForm() {
       <Container className="d-flex justify-content-center align-items-center max-vh-75 bg-light" style={{ maxWidth: '500px' }}>
         <div className="w-100">
           {message && <Alert variant={message.type}>{message.text}</Alert>}
+          {loading && <Alert variant='primary'>Loading...</Alert>}
 
           <h2 className="text-center mb-4">User Registration</h2>
 
