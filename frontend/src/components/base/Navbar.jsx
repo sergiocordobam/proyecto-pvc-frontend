@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 function NavbarPvc() {
   const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const navigate = useNavigate();
   const currentPath = window.location.pathname;
   const showLogout = !['/', '/login', '/register'].includes(currentPath);
@@ -13,14 +14,17 @@ function NavbarPvc() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
-
-      if (!firebaseUser && !['/', '/login', '/register'].includes(window.location.pathname)) {
-        navigate('/');
-      }
+      setAuthChecked(true);
     });
 
     return () => unsubscribe();
-  }, [navigate]);
+  }, []);
+
+  useEffect(() => {
+    if (authChecked && !user && !['/', '/login', '/register'].includes(currentPath)) {
+      navigate('/');
+    }
+  }, [authChecked, user, currentPath, navigate]);
 
   const handleLogout = async () => {
     await signOut(auth);
