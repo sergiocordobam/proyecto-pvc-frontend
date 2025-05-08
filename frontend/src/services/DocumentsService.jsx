@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080';
-
+const API_URL = process.env.REACT_APP_DOCUMENTS_API_URL_BASE || 'http://localhost:8080';
 class DocumentsService {
   async getAllUserDocumentsByID(userId) {
     try {

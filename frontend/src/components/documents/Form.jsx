@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Card, Form, Button, Alert, Row, Col } from 'react-bootstrap';
 import axios from 'axios'; // Axios todavía se necesita para las peticiones PUT de subida directa
-import './FileUploadForm.css';
+import './css/FileUploadForm.css';
 import DocumentsService from "../../services/DocumentsService.jsx"; // Importa los estilos CSS
 
 // Importar la función de servicio para solicitar URLs firmadas

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import './DashboardLayout.css';
+import './css/DashboardLayout.css';
 import FileListTable from "./FileListTable.jsx";
 import DocumentsService from "../../services/DocumentsService.jsx"; // Asegúrate de crear este archivo CSS
 
