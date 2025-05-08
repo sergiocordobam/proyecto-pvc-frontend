@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Table, Form, Button } from 'react-bootstrap';
-
+import { Trash3Fill, CheckCircleFill, SendFill } from 'react-bootstrap-icons';
+import DocumentsService from "../../services/DocumentsService.jsx";
 // --- Funciones Helper (DEFINIDAS FUERA DEL COMPONENTE) ---
 
 // Helper function to format file size
@@ -21,10 +22,9 @@ const inferFileType = (fileName) => {
     }
     return 'Desconocido';
 };
+const documentsService = DocumentsService
 
-// --- Componente FileListTable ---
-
-function FileListTable({ files }) {
+function FileListTable({ files,userID }) {
 
     // **** Validar la prop 'files' al inicio ****
     // Si 'files' no es un array válido (ej. undefined, null, no es array), usar un array vacío
@@ -73,16 +73,17 @@ function FileListTable({ files }) {
             alert("Selecciona al menos un archivo para borrar.");
             return;
         }
+        const fetchDeleteData= async (userId,fileName) => {
+            const response = await documentsService.deleteDocument(userId,fileName);
+            console.log("response: ", response.data);
+        }
         console.log(">>> Acción BORRAR solicitada para abs_paths:", selectedFileIds);
-        // ****** Aquí iría la lógica REAL para borrar los archivos seleccionados ******
-        // Típicamente: una llamada a tu API de backend enviando los selectedFileIds
-        // fetch('/api/delete-files', { method: 'POST', body: JSON.stringify({ files: selectedFileIds }) })
-        // Una vez que la API responde y confirma el borrado:
-        // 1. Actualizar la lista de archivos mostrada (ej. volviendo a pedir la lista completa o filtrando localmente)
-        //    const remainingFiles = validFiles.filter(file => !selectedFileIds.includes(file.metadata.abs_path));
-        //    // Llama a una prop del padre para actualizar la lista: onFilesUpdated(remainingFiles);
-        // 2. Limpiar la selección actual
-        //    setSelectedFileIds([]);
+        selectedFileIds.forEach((absPath) => {
+            const { userId, filename } = documentsService.extractUserInfoFromFilePath(absPath);
+            fetchDeleteData(userId,filename);
+
+        })
+
         // ***************************************************************************
     };
 
@@ -128,6 +129,7 @@ function FileListTable({ files }) {
                     disabled={selectedFileIds.length === 0} // Deshabilitar si no hay nada seleccionado
                     className="me-2" // Margen derecho
                 >
+                    <Trash3Fill className="me-1" />
                     Borrar Seleccionados ({selectedFileIds.length}) {/* Mostrar cuantos hay seleccionados */}
                 </Button>
                 <Button
@@ -164,7 +166,7 @@ function FileListTable({ files }) {
                         />
                     </th>
                     <th>Nombre</th>
-                    <th>Tipo</th>
+                    <th>Tipo de documento</th>
                     <th>Tamaño</th>
                     <th>Estado</th>
                     <th>Fecha de Creación</th>
@@ -188,14 +190,17 @@ function FileListTable({ files }) {
                     const formattedSize = formatBytes(rawSize);
 
                     // Determinar el tipo: usar content_type si existe y no es "undefined", sino inferir de la extensión
-                    const fileType = (file.metadata.content_type && file.metadata.content_type !== "undefined")
-                        ? file.metadata.content_type.split('/')[1] // Usar parte después de / si content_type existe
-                        : inferFileType(fileName); // Sino, inferir de la extensión del nombre
+                    const fileType = (file.metadata.type)
+                        ? file.metadata.type
+                        : "Desconocido";
 
                     // Formatear la fecha de creación
                     const creationDate = file.metadata.creation_date
                         ? new Date(file.metadata.creation_date).toLocaleDateString() // Puedes ajustar el formato (ej. con opciones)
                         : 'Fecha Desconocida';
+                    const status = file.metadata.status
+                        ?  file.metadata.status
+                        : 'Temporal xd';
 
                     // Usamos abs_path como key porque es único por archivo
                     // Es CRUCIAL usar un ID ÚNICO y ESTABLE como key para que React renderice correctamente
@@ -224,7 +229,7 @@ function FileListTable({ files }) {
                             <td>{fileType}</td>
                             <td>{formattedSize}</td>
                             {/* Como el estado no viene en tu JSON actual, ponemos un valor por defecto */}
-                            <td>{'Desconocido'}</td> {/* O file.metadata.status si existiera */}
+                            <td>{status}</td> {/* O file.metadata.status si existiera */}
                             <td>{creationDate}</td>
                             {/* Si añades acciones por fila, descomenta esta celda */}
                             {/* <td>

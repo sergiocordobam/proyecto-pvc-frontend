@@ -13,37 +13,41 @@ class DocumentsService {
     }
   }
 
-  async uploadDocument(file, metadata) {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    // Add any metadata
-    Object.keys(metadata).forEach(key => {
-      formData.append(key, metadata[key]);
-    });
+  async requestSignedUrls(userId, filesInfo) {
+    const requestBody = {
+      userId: userId,
+      files: filesInfo,
+    };
 
     try {
-      const response = await axios.post(`${API_URL}/documents/upload`, formData, {
+      const response = await axios.post(`${API_URL}/files/upload`, requestBody, {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'application/json',
+          // Si necesitas cabeceras de autenticación (ej. Token JWT), añádelas aquí:
+          // 'Authorization': `Bearer ${yourAuthToken}`,
+        },
       });
-      return response.data;
-    } catch (error) {
-      console.error('Error uploading document:', error);
+
+      // Axios lanza errores para respuestas no 2xx, por lo que si llega aquí, fue 2xx.
+      return response.data; // Retorna la data de la respuesta (esperando { documents: [...] })
+
+    }catch (error) {
+      console.error('Error solicitando URLs firmadas:', error);
+      // Re-lanzar el error para que el componente que llama lo pueda manejar
       throw error;
     }
   }
 
-  async deleteDocument(filename) {
-    try {
-      const response = await axios.delete(`${API_URL}/documents/${filename}`);
-      return response.data;
-    } catch (error) {
-      console.error('Error deleting document:', error);
-      throw error;
-    }
+async deleteDocument(userName, fileName) {
+ console.log(`Deleting document for user: ${userName}, file: ${fileName}`);
+  try {
+    const response = await axios.delete(`${API_URL}/files/${userName}/${fileName}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting document:', error);
+    throw error;
   }
+}
   async verifyDocument(filename) {
 
   }
@@ -53,6 +57,15 @@ class DocumentsService {
   async downloadDocuments(filename) {
 
   }
+  extractUserInfoFromFilePath(filePath) {
+    const components = filePath.split('/');
+    const userId = components[0];
+    const filename = components.slice(1).join('_');
+    console.log("userId: ", userId);
+    console.log("filename: ", filename);
+    return { userId, filename };
+  }
 }
+
 
 export default new DocumentsService();

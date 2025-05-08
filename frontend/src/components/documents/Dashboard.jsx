@@ -8,11 +8,13 @@ const documentsService = DocumentsService
 // Componente de Plantilla de Dashboard
 function DashboardLayout({ sidebarContent}) {
     const [filesData, setFiles] = useState([]);
+    const [userId, setUserId] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
             const userId = localStorage.getItem('user_id');
             console.log(userId);
+            setUserId(userId);
             if (!userId) {
                 return;
             }
@@ -40,7 +42,7 @@ function DashboardLayout({ sidebarContent}) {
 
 
                 <main className="dashboard-content">
-                    <FileListTable files={filesData} />
+                    <FileListTable files={filesData} userID={userId}/>
                 </main>
             </div>
         </div>
