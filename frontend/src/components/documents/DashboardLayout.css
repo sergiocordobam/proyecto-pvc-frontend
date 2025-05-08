@@ -1,0 +1,30 @@
+/* Estilo básico para el contenedor principal */
+.dashboard-container {
+    display: flex;
+    flex-direction: column; /* El header (si existe) arriba, luego el main */
+    min-height: 100vh; /* Ocupar al menos toda la altura de la ventana */
+}
+
+/* Estilo para el contenedor de la barra lateral y el contenido principal */
+.dashboard-main {
+    display: flex;
+    flex: 1; /* Ocupar el espacio restante */
+}
+
+/* Estilo para la barra lateral */
+.dashboard-sidebar {
+    width: 250px; /* Ancho fijo de la barra lateral (ajusta según necesites) */
+    background-color: #f8f9fa; /* Color de fondo claro (ejemplo de Bootstrap) */
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    /* Si quieres que la barra lateral sea fija y el contenido principal scrolleable, necesitarás más estilos CSS,
+       posicionamiento fijo y padding/margin en el contenido principal. */
+}
+
+/* Estilo para el área de contenido principal */
+.dashboard-content {
+    flex: 1; /* Ocupar todo el espacio restante horizontalmente */
+    padding: 20px;
+    overflow-y: auto; /* Permitir scroll si el contenido es muy largo */
+}
+
