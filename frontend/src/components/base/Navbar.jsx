@@ -22,6 +22,7 @@ function NavbarPvc() {
 
   useEffect(() => {
     if (authChecked && !user && !['/', '/login', '/register'].includes(currentPath)) {
+      localStorage.setItem('user_id', user.id);
       navigate('/');
     }
   }, [authChecked, user, currentPath, navigate]);

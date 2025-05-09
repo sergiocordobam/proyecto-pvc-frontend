@@ -1,0 +1,60 @@
+/* CitizenTransferComponent.css */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fa;
+    padding-top: 40px;
+  }
+  
+  .card.transfer-card {
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    padding: 25px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .transfer-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #343a40;
+    text-align: center;
+  }
+  
+  .transfer-card label {
+    font-weight: 500;
+    color: #495057;
+  }
+  
+  .transfer-card select {
+    border-radius: 8px;
+  }
+  
+  .transfer-card button {
+    width: 100%;
+    border-radius: 8px;
+  }
+  
+  .transfer-card button:disabled {
+    background-color: #ced4da;
+    cursor: not-allowed;
+  }
+  
+  .status-message {
+    margin-top: 15px;
+    text-align: center;
+    font-weight: 500;
+  }
+  
+  .status-message.success {
+    color: green;
+  }
+  
+  .status-message.error {
+    color: red;
+  }
+  
+  .status-message.warning {
+    color: orange;
+  }

@@ -1,0 +1,63 @@
+/* FileUploadForm.css */
+
+/* Styles from the original <style> block, adapted */
+body {
+    font-family: 'Inter', sans-serif; /* Asegúrate de importar la fuente Inter en tu index.html o App.js */
+    background-color: #f8f9fa;
+    padding-top: 40px;
+}
+
+/* Si usas el Container de Bootstrap, puedes ajustar el max-width allí o en App.js */
+/* .container {
+    max-width: 600px;
+} */
+
+.card {
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* React-Bootstrap handles btn-primary styles, but you can override if needed */
+/* .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    border-radius: 8px;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+} */
+
+/* React-Bootstrap handles form-control/form-label styles, but you can override if needed */
+/* .form-control, .form-label {
+    border-radius: 8px;
+} */
+
+/* Estilos para los campos de archivo dinámicos */
+.file-info-item {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #e9ecef;
+}
+
+.file-info-item .form-label {
+    font-weight: 500;
+}
+
+/* Estilo para el estado de subida */
+#uploadStatus { /* Mantener el ID o usar una clase si prefieres */
+    margin-top: 20px;
+}
+
+/* Estilos para mensajes de estado (puedes usar las clases de texto de Bootstrap como text-success, text-danger, text-warning, text-info) */
+/*
+.upload-status-message {
+    margin-bottom: 10px;
+}
+.upload-status-message.success { color: green; }
+.upload-status-message.error { color: red; }
+.upload-status-message.warning { color: orange; }
+.upload-status-message.info { color: blue; }
+*/
