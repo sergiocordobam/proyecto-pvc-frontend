@@ -38,7 +38,7 @@ export default function Login() {
             const idToken = await userCredential.user.getIdToken();
             console.log("idToken")
 
-            const res = await fetch("http://localhost:5000/verify_token", {
+            const res = await fetch("http://localhost:8000/auth/verify_token", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ idToken }),
@@ -61,7 +61,7 @@ export default function Login() {
                 }
     
                 setMessage(`Welcome, UID: ${result.uid}`);
-                window.location.href = "/my-profile";
+                // window.location.href = "/my-profile";
             } else {
                 setMessage("Invalid token");
             }
