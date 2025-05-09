@@ -4,11 +4,13 @@ import { auth } from "../../config/firebase";
 import { Form, Container, Button } from "react-bootstrap";
 import NavbarPvc from "../base/Navbar";
 import { useNavigate } from "react-router-dom";
+import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
 
 export default function Login() {
     const [formData, setFormData] = useState({ email: "", password: "" });
     const [message, setMessage] = useState("");
     const navigate = useNavigate();
+    const db = getFirestore();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -36,7 +38,7 @@ export default function Login() {
             const idToken = await userCredential.user.getIdToken();
             console.log("idToken")
 
-            const res = await fetch("http://localhost:8000/auth/verify_token", {
+            const res = await fetch("http://localhost:5000/verify_token", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ idToken }),
@@ -45,7 +47,19 @@ export default function Login() {
 
             const result = await res.json();
             console.log("result")
+
             if (res.ok) {
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("email", "==", formData.email));
+                const querySnapshot = await getDocs(q);
+    
+                if (!querySnapshot.empty) {
+                    const userData = querySnapshot.docs[0].data();
+                    const documentId = userData.document_id;
+    
+                    localStorage.setItem("document_id", documentId);
+                }
+    
                 setMessage(`Welcome, UID: ${result.uid}`);
                 window.location.href = "/my-profile";
             } else {

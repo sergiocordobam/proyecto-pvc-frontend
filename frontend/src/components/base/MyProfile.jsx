@@ -1,5 +1,6 @@
 import NavbarPvc
- from "./Navbar";
+from "./Navbar";
+
 function MyProfile() {
   return (
     <div>
