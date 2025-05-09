@@ -94,7 +94,7 @@ import NavbarPvc from '../base/Navbar'; // ✅ import Navbar component
 import './CitizenTransfer.css';
 
 const API_URL = 'http://localhost:8000/interop/comunication';
-const USER_ID_STORAGE_KEY = 'user_id'; 
+const USER_ID_STORAGE_KEY = "document_id"; 
 
 const CitizenTransferComponent = () => {
     const [citizenId, setCitizenId] = useState('');
