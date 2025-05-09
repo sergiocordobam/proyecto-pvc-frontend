@@ -8,21 +8,34 @@ FRONTEND_DIR = .
 # Create .env file from example
 setup-env-fix:
 	@if [ -f $(FRONTEND_DIR)/.env-example ]; then \
-		sed 's/DOCUMENTS_API_URL_BASE=/REACT_APP_DOCUMENTS_API_URL_BASE=/' $(FRONTEND_DIR)/.env-example > $(FRONTEND_DIR)/.env; \
-		echo "Created .env file with proper React prefixes"; \
+		cp $(FRONTEND_DIR)/.env-example $(FRONTEND_DIR)/.env; \
+		echo "Created .env file from example"; \
 	else \
 		echo ".env-example file not found"; \
 	fi
 
-
-# Docker commands
 docker-build:
-	docker build -t $(DOCKER_IMAGE_NAME) $(FRONTEND_DIR)
+	@if [ -f $(FRONTEND_DIR)/.env ]; then \
+		API_URL=$$(grep REACT_APP_DOCUMENTS_API_URL_BASE $(FRONTEND_DIR)/.env | cut -d= -f2); \
+		docker build \
+			--build-arg REACT_APP_DOCUMENTS_API_URL_BASE="$$API_URL" \
+			-t $(DOCKER_IMAGE_NAME) $(FRONTEND_DIR); \
+	else \
+		echo ".env file not found. Run 'make setup-env-fix' first."; \
+		exit 1; \
+	fi
 
 docker-run:
-	docker run -p 3000:5173 -v $$(pwd)/$(FRONTEND_DIR):/app -v /app/node_modules $(DOCKER_IMAGE_NAME)
-
-
+	@if [ -f $(FRONTEND_DIR)/.env ]; then \
+		docker run -p 3000:5173 \
+			--env-file $(FRONTEND_DIR)/.env \
+			-v $$(pwd)/$(FRONTEND_DIR):/app \
+			-v /app/node_modules \
+			$(DOCKER_IMAGE_NAME); \
+	else \
+		echo ".env file not found. Run 'make setup-env-fix' first."; \
+		exit 1; \
+	fi
 # Full setup - env, install, and docker build+run
 setup: setup-env docker-build docker-run
 
