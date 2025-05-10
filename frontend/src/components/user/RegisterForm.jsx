@@ -91,10 +91,10 @@ function RegisterForm() {
                     value={formData.document_id}
                     onChange={handleChange}
                     required
-                    isInvalid={formData.document_id && (formData.document_id.length < 7 || formData.document_id.length > 10)}
+                    isInvalid={formData.document_id && (formData.document_id.length < 10 || formData.document_id.length > 10)}
                   />
                   <Form.Control.Feedback type="invalid">
-                    Document ID must be between 7 and 10 digits.
+                    Document ID must be between 10 digits.
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>

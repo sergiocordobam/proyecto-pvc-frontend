@@ -91,13 +91,24 @@ export default function ResetPasswordForm() {
 
                     <Form.Group className="mb-3">
                         <Form.Label>Document Type</Form.Label>
-                        <Form.Control
+                        {/* <Form.Control
                             type="text"
                             name="document_type"
                             value={formData.document_type}
                             onChange={handleChange}
                             required
-                        />
+                        /> */}
+                        <Form.Select
+                            name="document_type"
+                            value={formData.document_type}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option value="">Select Document Type</option>
+                            <option value="CC">CC</option>
+                            <option value="TI">TI</option>
+                            <option value="Passport">Passport</option>
+                        </Form.Select>
                     </Form.Group>
 
                     <Form.Group className="mb-3">
