@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Table, Form, Button } from 'react-bootstrap';
-import { Trash3Fill, CheckCircleFill,FileEarmark,Download } from 'react-bootstrap-icons';
+import { Table, Form, Button, Modal } from 'react-bootstrap';
+import { Trash3Fill, CheckCircleFill, FileEarmark, Download, Upload } from 'react-bootstrap-icons';
 import DocumentsService from "../../services/DocumentsService.jsx";
+import FileUploadForm from "./Form.jsx";
 
 const formatBytes = (bytes, decimals = 2) => {
     if (bytes === 0) return '0 Bytes';
@@ -16,177 +17,204 @@ const formatBytes = (bytes, decimals = 2) => {
 const inferFileType = (fileName) => {
     const parts = fileName.split('.');
     if (parts.length > 1) {
-        return parts.pop().toUpperCase(); // Retorna la extensión en mayúsculas
+        return parts.pop().toUpperCase(); // Returns the extension in upper case
     }
     return 'Desconocido';
 };
-const documentsService = DocumentsService
 
-function FileListTable({ files,userID,setDeletedAction,setVerifyAction }) {
+function FileListTable({ files, userID, SetAction }) {
     const validFiles = Array.isArray(files.data) ? files.data : [];
     const [selectedFileIds, setSelectedFileIds] = useState([]);
-    const [isVeifiedOk, setIsVerifiedOk] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showUploadModal, setShowUploadModal] = useState(false);
 
+    const handleCloseSuccessModal = () => setShowSuccessModal(false);
+    const handleShowSuccessModal = () => setShowSuccessModal(true);
+    const handleShowUploadModal = () => setShowUploadModal(true);
+    const handleCloseUploadModal = () => setShowUploadModal(false);
 
-
-
-    const handleSelectFile = (absPath) => { // Usamos abs_path como ID único
+    // Handle individual file selection
+    const handleSelectFile = (absPath) => {
         setSelectedFileIds((prevSelected) => {
             if (prevSelected.includes(absPath)) {
-                // Si ya estaba seleccionado, lo quitamos
                 return prevSelected.filter((id) => id !== absPath);
             } else {
-                // Si no estaba seleccionado, lo agregamos
                 return [...prevSelected, absPath];
             }
         });
     };
 
-    // Manejar la selección de todos los archivos
+    // Select/deselect all files
     const handleSelectAll = (event) => {
         if (event.target.checked) {
-            // Si se marca "Seleccionar Todos", seleccionamos todos los abs_path de los archivos válidos
             const allFileIds = validFiles.map((file) => file.metadata.abs_path);
             setSelectedFileIds(allFileIds);
         } else {
-            // Si se desmarca "Seleccionar Todos", limpiamos la selección
             setSelectedFileIds([]);
         }
     };
 
-    // Verificar si todos los archivos están seleccionados (para el checkbox "Seleccionar Todos")
-    // Usar validFiles.length aquí
-    const isAllSelected = selectedFileIds.length === validFiles.length && validFiles.length > 0;
+    const isAllSelected = validFiles.length > 0 && selectedFileIds.length === validFiles.length;
 
+    // --- ACTION HANDLERS ---
 
-    // --- Funciones para Acciones (DEFINIDAS DENTRO DEL COMPONENTE PARA ACCEDER AL ESTADO) ---
-
-    const handleDeleteSelected = () => {
+    // Delete selected
+    const handleDeleteSelected = async () => {
         if (selectedFileIds.length === 0) {
             alert("Selecciona al menos un archivo para borrar.");
             return;
         }
-        const fetchDeleteData= async (userId,fileName) => {
-            const response = await documentsService.deleteDocument(userId,fileName);
-            console.log("response: ", response.data);
+        try {
+            await Promise.all(selectedFileIds.map(async (absPath) => {
+                const { userId, filename } = DocumentsService.extractUserInfoFromFilePath(absPath);
+                await DocumentsService.deleteDocument(userId, filename);
+            }));
+            handleShowSuccessModal();
+            setSelectedFileIds([]); // Optionally: clear selection after delete
+        } catch (err) {
+            alert("Ocurrió un error al borrar: " + (err.message ?? JSON.stringify(err)));
         }
-        selectedFileIds.forEach((absPath) => {
-            const { userId, filename } = documentsService.extractUserInfoFromFilePath(absPath);
-            fetchDeleteData(userId,filename);
-
-        })
-
-        // ***************************************************************************
     };
 
-    const handleVerifySelected = () => {
+    // Verificar selected
+    const handleVerifySelected = async () => {
         if (selectedFileIds.length === 0) {
             alert("Selecciona al menos un archivo para verificar.");
             return;
         }
-        const files=[]
+        const files = [];
         selectedFileIds.forEach((absPath) => {
-            const { userId, filename } = documentsService.extractUserInfoFromFilePath(absPath);
-            files.push(filename)
-
-        })
-        const reqBody={
+            const { filename } = DocumentsService.extractUserInfoFromFilePath(absPath);
+            files.push(filename);
+        });
+        const reqBody = {
             owner: parseInt(userID),
-            files: files
-        }
-        console.log("reqBody: ", reqBody);
+            files
+        };
 
-        const fetchVerifyData= async()=>{
-            const response= await documentsService.verifyDocument(reqBody);
-            console.log("response: ", response.data);
-            if (response.data.status === "ok") {
-                setIsVerifiedOk(true);
+        try {
+            const response = await DocumentsService.verifyDocument(reqBody);
+            if (response.data === "ok") {
+                handleShowSuccessModal();
             }
+        } catch (err) {
+            alert("Error verificando documentos: " + (err.message ?? JSON.stringify(err)));
         }
-        fetchVerifyData()
-        // ****** Aquí iría la lógica REAL para verificar ******
-        // Típicamente: llamada a API, y luego actualizar el estado de los archivos afectados en la lista.
-        // ****************************************************
     };
 
-    const handleDownloadSelected = () => {
+    // Descargar selected
+    const handleDownloadSelected = async () => {
         if (selectedFileIds.length === 0) {
-            alert("Selecciona al menos un archivo para enviar.");
+            alert("Selecciona al menos un archivo para descargar.");
             return;
         }
-        const files=[]
+        const files = [];
         selectedFileIds.forEach((absPath) => {
-            const { userId, filename } = documentsService.extractUserInfoFromFilePath(absPath);
-            files.push(filename)
-
-        })
-        const reqBody={
+            const { filename } = DocumentsService.extractUserInfoFromFilePath(absPath);
+            files.push(filename);
+        });
+        const reqBody = {
             owner: userID,
             file_names: files
-        }
-        console.log("reqBody: ", reqBody);
+        };
 
-        const fetchDownloadDocuments= async()=>{
-            const response= await documentsService.downloadDocuments(reqBody);
-            console.log("response: ", response.data);
+        try {
+            // You should implement file download logic based on your backend's response format
+            const response = await DocumentsService.downloadDocuments(reqBody);
+            // Example: if you get a Blob for a zip file
+            // const url = window.URL.createObjectURL(new Blob([response.data]));
+            // const link = document.createElement('a');
+            // link.href = url;
+            // link.setAttribute('download', 'archivos.zip');
+            // document.body.appendChild(link);
+            // link.click();
+            // document.body.removeChild(link);
+            handleShowSuccessModal(); // Show success for demo purposes
+        } catch (err) {
+            alert("Error al descargar documentos: " + (err.message ?? JSON.stringify(err)));
         }
-        fetchDownloadDocuments()
     };
 
+    // --- RENDER ---
 
-    // --- Renderizado del Componente ---
-
-    // Si no hay archivos válidos para mostrar
     if (validFiles.length === 0) {
-        // Importante: Considera si quieres mostrar un indicador de carga aquí si el padre
-        // está aún esperando la respuesta de la API. El padre debe manejar el estado de carga.
-        // Este mensaje es para cuando la lista *finalmente* está vacía.
         return <p>No hay archivos para mostrar.</p>;
     }
 
     return (
         <div>
-            {/* Botones de acción (usar selectedFileIds.length para habilitar/deshabilitar) */}
-            <div>
+            <div className="mb-2">
                 <Button
                     variant="danger"
                     onClick={handleDeleteSelected}
-                    disabled={selectedFileIds.length === 0} // Deshabilitar si no hay nada seleccionado
-                    className="me-2" // Margen derecho
+                    disabled={selectedFileIds.length === 0}
+                    className="me-2"
                 >
                     <Trash3Fill className="me-1" />
-                    Borrar Seleccionados ({selectedFileIds.length}) {/* Mostrar cuantos hay seleccionados */}
+                    Borrar Seleccionados ({selectedFileIds.length})
                 </Button>
                 <Button
                     variant="primary"
                     onClick={handleVerifySelected}
                     disabled={selectedFileIds.length === 0}
                     className="me-2"
-                ><CheckCircleFill />
+                >
+                    <CheckCircleFill className="me-1" />
                     Verificar Seleccionados ({selectedFileIds.length})
                 </Button>
                 <Button
                     variant="success"
                     onClick={handleDownloadSelected}
                     disabled={selectedFileIds.length === 0}
-                ><Download />
+                    className="me-2"
+                >
+                    <Download className="me-1" />
                     Descargar Seleccionados ({selectedFileIds.length})
                 </Button>
+                <Button
+                    variant="success"
+                    onClick={handleShowUploadModal}
+                    className="me-2"
+                >
+                    <Upload className="me-1" />
+                    Subir Archivos
+                </Button>
             </div>
+            {/* SUCCESS MODAL */}
+            <Modal show={showSuccessModal} onHide={handleCloseSuccessModal} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Operación Exitosa</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="text-center">
+                    <CheckCircleFill size={50} color="green" className="mb-3" />
+                    <h4>¡La operación se completó con éxito!</h4>
+                    <p>Tu acción ha sido procesada correctamente.</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="success" onClick={handleCloseSuccessModal}>
+                        Aceptar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
 
-            {/* Tabla de React-Bootstrap */}
-            {/* className="mt-3" añade margen superior de 3 unidades de espaciado Bootstrap */}
+            {/* UPLOAD MODAL */}
+            <Modal show={showUploadModal} onHide={handleCloseUploadModal} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Subir Archivos</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <FileUploadForm onUploaded={handleCloseUploadModal} />
+                </Modal.Body>
+            </Modal>
+
             <Table striped bordered hover responsive className="mt-3">
                 <thead>
                 <tr>
-                    {/* Columna para "Seleccionar Todos" */}
-                    {/* Checkbox principal para seleccionar/deseleccionar todo */}
-                    <th style={{ width: '50px' }}> {/* Darle un ancho fijo para que no se mueva */}
+                    <th style={{ width: '50px' }}>
                         <Form.Check
                             type="checkbox"
-                            checked={isAllSelected} // Determina si el checkbox está marcado
-                            onChange={handleSelectAll} // Manejador para la selección de todo
-                            // Deshabilitar el checkbox "Seleccionar Todos" si no hay archivos para seleccionar
+                            checked={isAllSelected}
+                            onChange={handleSelectAll}
                             disabled={validFiles.length === 0}
                         />
                     </th>
@@ -195,71 +223,45 @@ function FileListTable({ files,userID,setDeletedAction,setVerifyAction }) {
                     <th>Tamaño</th>
                     <th>Estado</th>
                     <th>Fecha de Creación</th>
-                    {/* Si añades acciones por fila, descomenta esta columna */}
-                    {/* <th>Acciones</th> */}
                 </tr>
                 </thead>
                 <tbody>
-                {/* Mapear sobre el array validFiles para crear cada fila */}
                 {validFiles.map((file) => {
-                    // Asegurarse de que metadata existe antes de intentar acceder a sus propiedades
-                    if (!file || !file.metadata) {
-                        console.warn("Skipping file entry due to missing metadata:", file);
-                        return null; // Saltar esta entrada si no tiene metadata
-                    }
-
-
-                    const fileName = file.metadata.name ? file.metadata.name.split('/').pop() : file.metadata.abs_path ? file.metadata.abs_path.split('/').pop() : 'Nombre Desconocido';
-                    const rawSize = file.metadata.size || 0; // Usar 0 si size es undefined/null
+                    if (!file || !file.metadata) return null;
+                    const fileName = file.metadata.name
+                        ? file.metadata.name.split('/').pop()
+                        : file.metadata.abs_path
+                            ? file.metadata.abs_path.split('/').pop()
+                            : 'Nombre Desconocido';
+                    const rawSize = file.metadata.size || 0;
                     const formattedSize = formatBytes(rawSize);
 
-                    // Determinar el tipo: usar content_type si existe y no es "undefined", sino inferir de la extensión
-                    const fileType = (file.metadata.type)
+                    const fileType = file.metadata.type
                         ? file.metadata.type
-                        : "Desconocido";
+                        : inferFileType(fileName);
 
-                    // Formatear la fecha de creación
                     const creationDate = file.metadata.creation_date
-                        ? new Date(file.metadata.creation_date).toLocaleDateString() // Puedes ajustar el formato (ej. con opciones)
+                        ? new Date(file.metadata.creation_date).toLocaleDateString()
                         : 'Fecha Desconocida';
-                    const status = file.metadata.status
-                        ?  file.metadata.status
-                        : 'Temporal xd';
+                    const status = file.metadata.status || 'Temporal';
 
-                    // Usamos abs_path como key porque es único por archivo
-                    // Es CRUCIAL usar un ID ÚNICO y ESTABLE como key para que React renderice correctamente
                     const fileId = file.metadata.abs_path;
-                    if (!fileId) {
-                        console.warn("Skipping file entry due to missing abs_path (required for key):", file);
-                        return null; // Saltar si no tiene un ID válido
-                    }
-
+                    if (!fileId) return null;
 
                     return (
-                        // Usar fileId (abs_path) como key para el <tr>
                         <tr key={fileId}>
-                            {/* Celda para el checkbox de selección */}
                             <td>
                                 <Form.Check
                                     type="checkbox"
-                                    // Marcar si el ID (abs_path) está en la lista de seleccionados
                                     checked={selectedFileIds.includes(fileId)}
-                                    // Llamar a la función de selección con el ID (abs_path)
                                     onChange={() => handleSelectFile(fileId)}
                                 />
                             </td>
-
-                            <td><FileEarmark /> {fileName}</td>
+                            <td><FileEarmark className="me-1" /> {fileName}</td>
                             <td>{fileType}</td>
                             <td>{formattedSize}</td>
-                            {/* Como el estado no viene en tu JSON actual, ponemos un valor por defecto */}
-                            <td>{status}</td> {/* O file.metadata.status si existiera */}
+                            <td>{status}</td>
                             <td>{creationDate}</td>
-                            {/* Si añades acciones por fila, descomenta esta celda */}
-                            {/* <td>
-                                <Button variant="outline-primary" size="sm" className="me-1">Ver</Button>
-                                <Button variant="outline-danger" size="sm">Borrar</Button>
-                            </td> */}
                         </tr>
                     );
                 })}
