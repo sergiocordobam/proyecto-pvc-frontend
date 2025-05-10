@@ -57,15 +57,39 @@ async deleteDocument(userName, fileName) {
       });
       return response.data;
     } catch (error) {
-      console.error('Error deleting document:', error);
+      console.error('Error verifiying document:', error);
       throw error;
     }
   }
-  async sendDocument(filename) {
 
-  }
-  async downloadDocuments(filename) {
+  async downloadDocuments(requestBody) {
+    console.log(`Downloading documents for: ${requestBody.owner}`);
+    try {
 
+      const responseUrlsObjs = await axios.post(`${API_URL}/files/download/${requestBody.owner}`,requestBody,{
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log("responseUrlsObjs: ", responseUrlsObjs.data.data);
+      responseUrlsObjs.data.data.forEach((responseUrlObj) => {
+        const url = responseUrlObj.signedUrl; // Accede a la URL firmada
+        const fileName = responseUrlObj.fileName; // Accede al nombre del archivo
+
+        console.log(`Downloading file: ${fileName} from URL: ${url}`);
+
+        // Lógica para crear y "clic" un enlace temporal para descargar
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName; // Sugiere el nombre del archivo
+        document.body.appendChild(link);
+        link.click(); // Simula el clic para iniciar la descarga
+        document.body.removeChild(link); // Elimina el enlace temporal
+      });
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      throw error;
+    }
   }
   extractUserInfoFromFilePath(filePath) {
     const components = filePath.split('/');
