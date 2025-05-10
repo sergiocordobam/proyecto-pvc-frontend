@@ -7,6 +7,8 @@ import { Route, Routes } from 'react-router-dom';
 import Dashboard from "./components/documents/Dashboard.jsx";
 import Form from "./components/documents/Form.jsx";
 import CitizenTransferComponent from "./components/transfer/CitizenTransferComponent.jsx";
+import ResetPasswordForm from './components/user/ResetPassword.jsx';
+
 function App() {
   return (
     <Routes>
@@ -17,6 +19,7 @@ function App() {
       <Route path="/dashboard" element={<Dashboard  />} />
       <Route path="/dashboard/form" element={<Form />} />
       <Route path="/transfer" element={<CitizenTransferComponent />} />
+      <Route path="/reset-password" element={<ResetPasswordForm />} />
     </Routes>
   );
 }
