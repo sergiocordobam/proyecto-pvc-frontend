@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Table, Form, Button, Modal } from 'react-bootstrap';
-import { Trash3Fill, CheckCircleFill, FileEarmark, Download, Upload } from 'react-bootstrap-icons';
+import { Trash3Fill, CheckCircleFill, FileEarmark, Download } from 'react-bootstrap-icons';
 import DocumentsService from "../../services/DocumentsService.jsx";
-import FileUploadForm from "./Form.jsx";
 
 const formatBytes = (bytes, decimals = 2) => {
     if (bytes === 0) return '0 Bytes';
@@ -13,11 +12,10 @@ const formatBytes = (bytes, decimals = 2) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
 
-// Helper function to infer file type from name (simple extension check)
 const inferFileType = (fileName) => {
     const parts = fileName.split('.');
     if (parts.length > 1) {
-        return parts.pop().toUpperCase(); // Returns the extension in upper case
+        return parts.pop().toUpperCase();
     }
     return 'Desconocido';
 };
@@ -26,14 +24,12 @@ function FileListTable({ files, userID, SetAction }) {
     const validFiles = Array.isArray(files.data) ? files.data : [];
     const [selectedFileIds, setSelectedFileIds] = useState([]);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [showUploadModal, setShowUploadModal] = useState(false);
 
     const handleCloseSuccessModal = () => setShowSuccessModal(false);
     const handleShowSuccessModal = () => setShowSuccessModal(true);
-    const handleShowUploadModal = () => setShowUploadModal(true);
-    const handleCloseUploadModal = () => setShowUploadModal(false);
 
-    // Handle individual file selection
+    // ...MISMAS LÓGICAS DE SELECCIÓN, BORRAR, VERIFICAR, DESCARGAR...
+
     const handleSelectFile = (absPath) => {
         setSelectedFileIds((prevSelected) => {
             if (prevSelected.includes(absPath)) {
@@ -44,7 +40,6 @@ function FileListTable({ files, userID, SetAction }) {
         });
     };
 
-    // Select/deselect all files
     const handleSelectAll = (event) => {
         if (event.target.checked) {
             const allFileIds = validFiles.map((file) => file.metadata.abs_path);
@@ -56,9 +51,6 @@ function FileListTable({ files, userID, SetAction }) {
 
     const isAllSelected = validFiles.length > 0 && selectedFileIds.length === validFiles.length;
 
-    // --- ACTION HANDLERS ---
-
-    // Delete selected
     const handleDeleteSelected = async () => {
         if (selectedFileIds.length === 0) {
             alert("Selecciona al menos un archivo para borrar.");
@@ -70,13 +62,12 @@ function FileListTable({ files, userID, SetAction }) {
                 await DocumentsService.deleteDocument(userId, filename);
             }));
             handleShowSuccessModal();
-            setSelectedFileIds([]); // Optionally: clear selection after delete
+            setSelectedFileIds([]);
         } catch (err) {
             alert("Ocurrió un error al borrar: " + (err.message ?? JSON.stringify(err)));
         }
     };
 
-    // Verificar selected
     const handleVerifySelected = async () => {
         if (selectedFileIds.length === 0) {
             alert("Selecciona al menos un archivo para verificar.");
@@ -102,7 +93,6 @@ function FileListTable({ files, userID, SetAction }) {
         }
     };
 
-    // Descargar selected
     const handleDownloadSelected = async () => {
         if (selectedFileIds.length === 0) {
             alert("Selecciona al menos un archivo para descargar.");
@@ -119,23 +109,13 @@ function FileListTable({ files, userID, SetAction }) {
         };
 
         try {
-            // You should implement file download logic based on your backend's response format
+            // Implement download logic
             const response = await DocumentsService.downloadDocuments(reqBody);
-            // Example: if you get a Blob for a zip file
-            // const url = window.URL.createObjectURL(new Blob([response.data]));
-            // const link = document.createElement('a');
-            // link.href = url;
-            // link.setAttribute('download', 'archivos.zip');
-            // document.body.appendChild(link);
-            // link.click();
-            // document.body.removeChild(link);
-            handleShowSuccessModal(); // Show success for demo purposes
+            handleShowSuccessModal();
         } catch (err) {
             alert("Error al descargar documentos: " + (err.message ?? JSON.stringify(err)));
         }
     };
-
-    // --- RENDER ---
 
     if (validFiles.length === 0) {
         return <p>No hay archivos para mostrar.</p>;
@@ -171,16 +151,10 @@ function FileListTable({ files, userID, SetAction }) {
                     <Download className="me-1" />
                     Descargar Seleccionados ({selectedFileIds.length})
                 </Button>
-                <Button
-                    variant="success"
-                    onClick={handleShowUploadModal}
-                    className="me-2"
-                >
-                    <Upload className="me-1" />
-                    Subir Archivos
-                </Button>
+                {/* Ya NO hay botón de subir aquí */}
             </div>
-            {/* SUCCESS MODAL */}
+
+            {/* MODAL DE ÉXITO */}
             <Modal show={showSuccessModal} onHide={handleCloseSuccessModal} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Operación Exitosa</Modal.Title>
@@ -195,16 +169,6 @@ function FileListTable({ files, userID, SetAction }) {
                         Aceptar
                     </Button>
                 </Modal.Footer>
-            </Modal>
-
-            {/* UPLOAD MODAL */}
-            <Modal show={showUploadModal} onHide={handleCloseUploadModal} centered>
-                <Modal.Header closeButton>
-                    <Modal.Title>Subir Archivos</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <FileUploadForm onUploaded={handleCloseUploadModal} />
-                </Modal.Body>
             </Modal>
 
             <Table striped bordered hover responsive className="mt-3">
