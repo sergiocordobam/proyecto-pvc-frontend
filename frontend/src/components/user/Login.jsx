@@ -56,8 +56,10 @@ export default function Login() {
                 if (!querySnapshot.empty) {
                     const userData = querySnapshot.docs[0].data();
                     const documentId = userData.document_id;
+                    const email = userData.email;
     
                     localStorage.setItem("document_id", documentId);
+                    localStorage.setItem("email", email)
                 }
     
                 setMessage(`Welcome, UID: ${result.uid}`);
