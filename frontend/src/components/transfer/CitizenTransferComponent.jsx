@@ -148,7 +148,7 @@ const CitizenTransferComponent = () => {
 
     return (
         <>
-            <NavbarPvc /> {/* ✅ Include the navbar */}
+            <NavbarPvc /> 
             <div className="card transfer-card">
                 <h2>Transfer Citizen</h2>
 
