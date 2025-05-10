@@ -49,7 +49,7 @@ export default function ResetPasswordForm() {
 
     return (
         <>
-            <NavbarPvc />
+            {/* <NavbarPvc /> */}
             <Container className="mt-5" style={{ maxWidth: "600px" }}>
                 <h3 className="mb-4 text-center">Reset Password</h3>
                 {error && <Alert variant="danger">{error}</Alert>}
