@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { Table, Form, Button } from 'react-bootstrap';
-import { Trash3Fill, CheckCircleFill, SendFill } from 'react-bootstrap-icons';
+import { Trash3Fill, CheckCircleFill,FileEarmark,Download } from 'react-bootstrap-icons';
 import DocumentsService from "../../services/DocumentsService.jsx";
-// --- Funciones Helper (DEFINIDAS FUERA DEL COMPONENTE) ---
 
-// Helper function to format file size
 const formatBytes = (bytes, decimals = 2) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -25,18 +23,13 @@ const inferFileType = (fileName) => {
 const documentsService = DocumentsService
 
 function FileListTable({ files,userID,setDeletedAction,setVerifyAction }) {
-
-    // **** Validar la prop 'files' al inicio ****
-    // Si 'files' no es un array válido (ej. undefined, null, no es array), usar un array vacío
     const validFiles = Array.isArray(files.data) ? files.data : [];
-
-
-    // Estado para manejar los IDs de los archivos seleccionados (usaremos abs_path como ID)
     const [selectedFileIds, setSelectedFileIds] = useState([]);
+    const [isVeifiedOk, setIsVerifiedOk] = useState(false);
 
-    // --- Funciones para Manejar Selección ---
 
-    // Manejar la selección de un archivo individual
+
+
     const handleSelectFile = (absPath) => { // Usamos abs_path como ID único
         setSelectedFileIds((prevSelected) => {
             if (prevSelected.includes(absPath)) {
@@ -106,6 +99,9 @@ function FileListTable({ files,userID,setDeletedAction,setVerifyAction }) {
         const fetchVerifyData= async()=>{
             const response= await documentsService.verifyDocument(reqBody);
             console.log("response: ", response.data);
+            if (response.data.status === "ok") {
+                setIsVerifiedOk(true);
+            }
         }
         fetchVerifyData()
         // ****** Aquí iría la lógica REAL para verificar ******
@@ -113,14 +109,28 @@ function FileListTable({ files,userID,setDeletedAction,setVerifyAction }) {
         // ****************************************************
     };
 
-    const handleSendSelected = () => {
+    const handleDownloadSelected = () => {
         if (selectedFileIds.length === 0) {
             alert("Selecciona al menos un archivo para enviar.");
             return;
         }
-        console.log(">>> Acción ENVIAR solicitada para abs_paths:", selectedFileIds);
-        // ****** Aquí iría la lógica REAL para enviar ******
-        // **************************************************
+        const files=[]
+        selectedFileIds.forEach((absPath) => {
+            const { userId, filename } = documentsService.extractUserInfoFromFilePath(absPath);
+            files.push(filename)
+
+        })
+        const reqBody={
+            owner: userID,
+            file_names: files
+        }
+        console.log("reqBody: ", reqBody);
+
+        const fetchDownloadDocuments= async()=>{
+            const response= await documentsService.downloadDocuments(reqBody);
+            console.log("response: ", response.data);
+        }
+        fetchDownloadDocuments()
     };
 
 
@@ -152,15 +162,15 @@ function FileListTable({ files,userID,setDeletedAction,setVerifyAction }) {
                     onClick={handleVerifySelected}
                     disabled={selectedFileIds.length === 0}
                     className="me-2"
-                >
+                ><CheckCircleFill />
                     Verificar Seleccionados ({selectedFileIds.length})
                 </Button>
                 <Button
                     variant="success"
-                    onClick={handleSendSelected}
+                    onClick={handleDownloadSelected}
                     disabled={selectedFileIds.length === 0}
-                >
-                    Enviar Seleccionados ({selectedFileIds.length})
+                ><Download />
+                    Descargar Seleccionados ({selectedFileIds.length})
                 </Button>
             </div>
 
@@ -198,8 +208,7 @@ function FileListTable({ files,userID,setDeletedAction,setVerifyAction }) {
                         return null; // Saltar esta entrada si no tiene metadata
                     }
 
-                    // Extraer y formatear data de file.metadata.*
-                    // Usar abs_path como fallback si name no existe
+
                     const fileName = file.metadata.name ? file.metadata.name.split('/').pop() : file.metadata.abs_path ? file.metadata.abs_path.split('/').pop() : 'Nombre Desconocido';
                     const rawSize = file.metadata.size || 0; // Usar 0 si size es undefined/null
                     const formattedSize = formatBytes(rawSize);
@@ -239,8 +248,8 @@ function FileListTable({ files,userID,setDeletedAction,setVerifyAction }) {
                                     onChange={() => handleSelectFile(fileId)}
                                 />
                             </td>
-                            {/* Celdas para los datos del archivo, usando la data transformada/formateada */}
-                            <td>{fileName}</td>
+
+                            <td><FileEarmark /> {fileName}</td>
                             <td>{fileType}</td>
                             <td>{formattedSize}</td>
                             {/* Como el estado no viene en tu JSON actual, ponemos un valor por defecto */}
