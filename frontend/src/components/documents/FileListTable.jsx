@@ -24,7 +24,7 @@ const inferFileType = (fileName) => {
 };
 const documentsService = DocumentsService
 
-function FileListTable({ files,userID }) {
+function FileListTable({ files,userID,setDeletedAction,setVerifyAction }) {
 
     // **** Validar la prop 'files' al inicio ****
     // Si 'files' no es un array válido (ej. undefined, null, no es array), usar un array vacío
@@ -77,7 +77,6 @@ function FileListTable({ files,userID }) {
             const response = await documentsService.deleteDocument(userId,fileName);
             console.log("response: ", response.data);
         }
-        console.log(">>> Acción BORRAR solicitada para abs_paths:", selectedFileIds);
         selectedFileIds.forEach((absPath) => {
             const { userId, filename } = documentsService.extractUserInfoFromFilePath(absPath);
             fetchDeleteData(userId,filename);
@@ -92,7 +91,23 @@ function FileListTable({ files,userID }) {
             alert("Selecciona al menos un archivo para verificar.");
             return;
         }
-        console.log(">>> Acción VERIFICAR solicitada para abs_paths:", selectedFileIds);
+        const files=[]
+        selectedFileIds.forEach((absPath) => {
+            const { userId, filename } = documentsService.extractUserInfoFromFilePath(absPath);
+            files.push(filename)
+
+        })
+        const reqBody={
+            owner: parseInt(userID),
+            files: files
+        }
+        console.log("reqBody: ", reqBody);
+
+        const fetchVerifyData= async()=>{
+            const response= await documentsService.verifyDocument(reqBody);
+            console.log("response: ", response.data);
+        }
+        fetchVerifyData()
         // ****** Aquí iría la lógica REAL para verificar ******
         // Típicamente: llamada a API, y luego actualizar el estado de los archivos afectados en la lista.
         // ****************************************************

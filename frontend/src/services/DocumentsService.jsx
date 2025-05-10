@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080';
-
+const API_URL = import.meta.env.VITE_Documents_API_BASE_URL|| 'http://localhost:8080';
 class DocumentsService {
   async getAllUserDocumentsByID(userId) {
     try {
@@ -48,8 +47,19 @@ async deleteDocument(userName, fileName) {
     throw error;
   }
 }
-  async verifyDocument(filename) {
-
+  async verifyDocument(requestBody) {
+    console.log(`Verifiying Documents for: ${requestBody.owner}`);
+    try {
+      const response = await axios.post(`${API_URL}/auth/documents`,requestBody,{
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      throw error;
+    }
   }
   async sendDocument(filename) {
 
