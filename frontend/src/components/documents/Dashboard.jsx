@@ -28,7 +28,7 @@ function Dashboard() {
         const fetchData = async () => {
             setLoading(true);
             setError(null);
-            const storedUserId = localStorage.getItem('user_id');
+            const storedUserId = localStorage.getItem('document_id');
             setUserId(storedUserId);
 
             if (!storedUserId) {

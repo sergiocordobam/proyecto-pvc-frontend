@@ -80,7 +80,8 @@ function FileListTable({ files, userID, SetAction }) {
         });
         const reqBody = {
             owner: parseInt(userID),
-            files
+            files: files,
+            email: localStorage.getItem("email")
         };
 
         try {
