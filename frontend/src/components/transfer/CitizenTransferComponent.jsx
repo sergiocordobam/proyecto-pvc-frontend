@@ -94,10 +94,14 @@ import NavbarPvc from '../base/Navbar'; // ✅ import Navbar component
 import './CitizenTransfer.css';
 
 const API_URL = 'http://localhost:8000/interop/comunication';
-const USER_ID_STORAGE_KEY = "document_id"; 
+const USER_ID_STORAGE_KEY = "document_id";
+const USER_EMAIL_STORAGE_KEY = "email";
+const USER_NAME_STORAGE_KEY = "name";
 
 const CitizenTransferComponent = () => {
     const [citizenId, setCitizenId] = useState('');
+    const [citizenEmail, setCitizenEmail] = useState('');
+    const [citizenName, setCitizenName] = useState('');
     const [operators, setOperators] = useState([]);
     const [selectedOperator, setSelectedOperator] = useState('');
     const [statusMessage, setStatusMessage] = useState('');
@@ -106,14 +110,20 @@ const CitizenTransferComponent = () => {
 
     useEffect(() => {
         const storedUserId = localStorage.getItem(USER_ID_STORAGE_KEY);
+        const storedUserEmail = localStorage.getItem(USER_EMAIL_STORAGE_KEY);
+        const storedUserName = localStorage.getItem(USER_NAME_STORAGE_KEY);
         console.log('Stored User ID:', storedUserId);
+        console.log('Stored User Email:', storedUserEmail);
+        console.log('Stored User Name:', storedUserName);
 
-        if (!storedUserId) {
+        if (!storedUserId || !storedUserEmail || !storedUserName) {
             navigate('/login');
             return;
         }
 
         setCitizenId(storedUserId);
+        setCitizenEmail(storedUserEmail);
+        setCitizenName(storedUserName);
 
         const fetchOperators = async () => {
             try {
@@ -134,6 +144,8 @@ const CitizenTransferComponent = () => {
             const payload = {
                 citizenId,
                 operatorId: selectedOperator,
+                citizenEmail,
+                citizenName
             };
 
             await axios.post(`${API_URL}/transfers/process-transfer`, payload);
