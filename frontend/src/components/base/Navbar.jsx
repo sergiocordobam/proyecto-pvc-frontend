@@ -28,6 +28,9 @@ function NavbarPvc() {
   }, [authChecked, user, currentPath, navigate]);
 
   const handleLogout = async () => {
+    localStorage.removeItem("document_id");
+    localStorage.removeItem("name");
+    localStorage.removeItem("email");
     await signOut(auth);
     navigate('/');
   };
